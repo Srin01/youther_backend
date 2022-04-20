@@ -1,0 +1,22 @@
+{% extends "rest_framework/base.html" %}
+{% load static %}
+
+
+  <head>
+    <link rel="stylesheet"  href="{%  static  'css/style.css'  %}">
+  </head>
+
+{% block title %} Youther {% endblock %}
+
+{% block branding %} 
+
+    <span>
+        <div class="header">
+            <img src="{% static 'static/images/Youther-logos.jpeg' %}" alt="logo" />
+            <a href = "http://localhost:3000/" rel = "nofollow" class = "navbar-brand">
+                Youther
+            </a>
+          </div>
+    </span>
+
+{% endblock %}

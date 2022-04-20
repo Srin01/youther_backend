@@ -1,6 +1,11 @@
+from email.policy import default
 import uuid
 import os
+import jwt
+from rest_framework_jwt.settings import api_settings
 from django.db import models
+import datetime
+from datetime import timedelta
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
@@ -65,11 +70,41 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
     hobbies = models.ManyToManyField(Hobby, related_name='user_hobbies')
+    account_balance = models.DecimalField(max_digits=10, decimal_places=2, default = 10000.00)
 
     objects = UserManager()
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
+
+    @property
+    def token(self):
+        """
+        Allows us to get a user's token by calling `user.token` instead of
+        `user.generate_jwt_token().
+
+        The `@property` decorator above makes this possible. `token` is called
+        a "dynamic property".
+        """
+        return self._generate_jwt_token()
+
+    def _generate_jwt_token(self):
+        """
+        Generates a JSON Web Token that stores this user's ID and has an expiry
+        date set to 60 days into the future.
+        """
+        dt = datetime.datetime.now() + timedelta(days=60)
+
+        token = jwt.encode({
+            'user_id': self.pk,
+            'username': self.username,
+       
+            'exp': datetime.datetime.utcnow() + api_settings.JWT_EXPIRATION_DELTA
+            # 'id': self.pk,
+            # 'exp': int(dt.strftime('%s'))
+        }, settings.SECRET_KEY, algorithm='HS256')
+
+        return token.decode('utf-8')
 
     def number_of_followers(self):
         if self.followers.count():
@@ -89,7 +124,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Transaction(models.Model):
     idtransaction = models.AutoField(db_column='idTransaction', primary_key=True)  # Field name made lowercase.
-    transactionamount = models.FloatField(db_column='TransactionAmount', blank=True, null=True)  # Field name made lowercase.
+    transactionamount = models.DecimalField(db_column='TransactionAmount',max_digits=10, decimal_places=2, default = 0.0)  # Field name made lowercase.
     transactionresult = models.CharField(db_column='TransactionResult', max_length=45, blank=True, null=True)  # Field name made lowercase.
     user_idbuyer = models.ForeignKey('User', models.DO_NOTHING, db_column='user_idBuyer', related_name = 'buyer')  # Field name made lowercase.
     user_idseller = models.ForeignKey('User', models.DO_NOTHING, db_column='user_idSeller', related_name = 'seller')  # Field name made lowercase.

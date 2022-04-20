@@ -17,9 +17,17 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
+from django.contrib import admin
+
+from core import views
+
+admin.site.site_header = 'Youther'                    # default: "Django Administration"
+admin.site.index_title = 'Yother Admin'                 # default: "Site administration"
 
 urlpatterns = [
+    path('sql/user', views.UserSQL),
     path('admin/', admin.site.urls),
     path('api/user/', include('user.urls')),
     path('api/post/', include('post.urls')),
+    path('api/transaction/', include('transaction.urls')),
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

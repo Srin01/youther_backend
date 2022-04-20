@@ -1,5 +1,5 @@
 from django.urls import path
-
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework_jwt.views import obtain_jwt_token
 from user import views
 
@@ -20,5 +20,6 @@ urlpatterns = [
          name='get-followers'),
     path('<slug:username>/get-following/', views.GetFollowingView.as_view(),
          name='get-following'),
+
 
 ]
